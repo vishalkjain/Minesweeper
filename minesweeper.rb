@@ -7,8 +7,11 @@ class Minesweeper
   end
 
   def run
-    # puts "New game(n) or load a saved game(l)?"
-#     new_or_saved = gets.chomp
+    puts "New game(n) or load a saved game(l)?"
+    new_or_saved = gets.chomp
+    if new_or_saved == "l"
+      load_game
+    end
 
     puts "Enter 's' at any time to save."
 
@@ -37,10 +40,15 @@ class Minesweeper
   end
 
   def save_game
-    save = self.to_yaml
+    save = @board.to_yaml
     File.open("minesweeper_save.txt", "w") do |f|
       f.puts save
     end
+  end
+
+  def load_game
+    saved_board = File.read("minesweeper_save.txt")
+    @board = YAML::load(saved_board)
   end
 end
 
