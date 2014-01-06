@@ -22,7 +22,7 @@ class Board
 
   def initialize
     @board_array = set_board
-    @masked_board = mask_board
+    @masked_board = Array.new(9){Array.new(9){Tile.new}}
   end
 
   def mask_board
@@ -31,7 +31,13 @@ class Board
   def display
     @board_array.each do |row|
       row.each do |tile|
-        print tile.value
+        if tile.hidden?
+          print "_ "
+        elsif tile.flagged?
+          print "f "
+        elsif tile.revealed?
+          print tile.value + " "
+        end
       end
       puts
     end
@@ -95,6 +101,9 @@ class Tile
 
   def initialize
     @value = 0
+    @hidden = true
+    @revealed = false
+    @flagged = false
   end
 
   def bomb?
@@ -106,7 +115,24 @@ class Tile
   end
 
   def set_flag
-    self.value = "f"
+    @flagged = true
+  end
+
+  def flagged?
+    @flagged
+  end
+
+  def reveal
+    @revealed = true
+    @hidden = false
+  end
+
+  def revealed?
+    @revealed
+  end
+
+  def hidden?
+    @hidden
   end
 end
 
