@@ -22,10 +22,7 @@ class Board
 
   def initialize
     @board_array = set_board
-    @masked_board = Array.new(9){Array.new(9){Tile.new}}
-  end
-
-  def mask_board
+    @flags = BOMB_NUMBER
   end
 
   def display
@@ -36,7 +33,7 @@ class Board
         elsif tile.flagged?
           print "f "
         elsif tile.revealed?
-          print tile.value + " "
+          print tile.value.to_s + " "
         end
       end
       puts
@@ -50,6 +47,59 @@ class Board
     finished_board = set_numbers(bomb_board)
 
     finished_board
+  end
+
+  def take_action(action, coordinate)
+    coordinate_array = coordinate.split(",").map { |value| value.to_i }
+    y =  coordinate_array[0]
+    x =  coordinate_array[1]
+    tile = @board_array[y][x]
+    if action == "r"
+      tile.reveal
+      if @board_array[y][x].value == 0
+        update_zeros(y,x)
+      end
+    elsif action == "f"
+      @board_array[y][x].set_flag
+      @flags -= 1
+    else
+      return puts "Invalid"
+    end
+
+  end
+
+  def update_zeros(y, x)
+    checkers=[[1,1], [1,0], [1,-1], [0,-1], [-1,-1], [-1,0], [-1,1], [0,1]]
+
+    positions_to_visit = [[y,x]]
+    positions_visited = []
+
+    until positions_to_visit.empty?
+      p positions_to_visit
+      current_position = positions_to_visit.shift
+      positions_visited << current_position
+
+      checkers.each do |change|
+
+        adjacent_coordinates = [current_position[0] + change[0], current_position[1] + change[1]]
+
+        possible_y = adjacent_coordinates[0]
+        possible_x = adjacent_coordinates[1]
+
+        next if @board_array[possible_y].nil? || possible_y < 0
+        next if @board_array[possible_y][possible_x].nil? || possible_x < 0
+
+        possible_tile = @board_array[possible_y][possible_x]
+
+        if possible_tile.value == 0
+          possible_tile.reveal
+          positions_to_visit << [possible_y, possible_x] unless positions_visited.include?([possible_y, possible_x])
+        elsif possible_tile.value > 0
+          possible_tile.reveal
+        end
+
+      end
+    end
   end
 
   def set_bombs(board)
@@ -94,6 +144,22 @@ class Board
 
     board
   end
+
+  def over?
+    won? # || lost?
+  end
+
+  def won?
+    @board_array.each do |row|
+      row.each do |tile|
+        if tile.bomb? && !tile.flagged?
+          return false
+        end
+      end
+    end
+    true
+  end
+
 end
 
 class Tile
@@ -135,6 +201,5 @@ class Tile
     @hidden
   end
 end
-
-b = Board.new
-b.display
+m = Minesweeper.new
+m.run
