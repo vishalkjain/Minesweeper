@@ -1,6 +1,7 @@
 require 'yaml'
 require 'time'
-require 'debugger'
+require 'unicode'
+
 class Minesweeper
 
   def initialize
@@ -113,7 +114,7 @@ class Board
       row.each do |tile|
 
         if tile.flagged?
-          print "f "
+          print "#{"\u2714".encode("utf-8")} "
         elsif tile.hidden?
           print "_ "
         elsif tile.revealed?
