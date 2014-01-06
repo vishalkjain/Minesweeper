@@ -161,7 +161,7 @@ class Board
     bombs = []
     @board_array.each do |row|
       row.each do |tile|
-        if tile.value.bomb?
+        if tile.bomb?
           bombs << tile
         end
       end
