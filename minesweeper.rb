@@ -157,14 +157,29 @@ class Board
     won? || lost?
   end
 
-  def won?
+  def bombs
+    bombs = []
     @board_array.each do |row|
       row.each do |tile|
-        if tile.bomb? && !tile.flagged?
-          return false
+        if tile.value.bomb?
+          bombs << tile
         end
       end
     end
+    bombs
+  end
+
+  def won?
+
+    bomb_tiles = bombs
+    return false if @flags != 0
+
+    bomb_tiles.each do |tile|
+      if !tile.flagged?
+       return false
+      end
+    end
+
     true
   end
 
