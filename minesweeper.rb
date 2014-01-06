@@ -1,5 +1,5 @@
 require 'yaml'
-
+require 'time'
 class Minesweeper
 
   def initialize
@@ -33,7 +33,8 @@ class Minesweeper
     @board.display
 
     if @board.won?
-      puts "YOU WIN!!!"
+      end_time = Time.now.sec - @board.time
+      puts "YOU WIN!!! It took #{end_time} seconds"
     else
       puts "NICE TRY... you lose."
     end
@@ -53,12 +54,14 @@ class Minesweeper
 end
 
 class Board
+  attr_reader :time
   BOMB_NUMBER = 10
   BOARD_SIZE = 9
 
   def initialize
     @board_array = set_board
     @flags = BOMB_NUMBER
+    @time = Time.now
   end
 
   def display
