@@ -13,7 +13,14 @@ class Minesweeper
       coordinate = gets.chomp
       @board.take_action(action, coordinate)
     end
-    @board.end_condition
+
+    @board.display
+
+    if @board.won?
+      puts "YOU WIN!!!"
+    else
+      puts "NICE TRY... you lose."
+    end
   end
 end
 
@@ -28,10 +35,11 @@ class Board
   def display
     @board_array.each do |row|
       row.each do |tile|
-        if tile.hidden?
-          print "_ "
-        elsif tile.flagged?
+
+        if tile.flagged?
           print "f "
+        elsif tile.hidden?
+          print "_ "
         elsif tile.revealed?
           print tile.value.to_s + " "
         end
@@ -75,7 +83,7 @@ class Board
     positions_visited = []
 
     until positions_to_visit.empty?
-      p positions_to_visit
+
       current_position = positions_to_visit.shift
       positions_visited << current_position
 
@@ -146,7 +154,7 @@ class Board
   end
 
   def over?
-    won? # || lost?
+    won? || lost?
   end
 
   def won?
@@ -158,6 +166,17 @@ class Board
       end
     end
     true
+  end
+
+  def lost?
+    @board_array.each do |row|
+      row.each do |tile|
+        if tile.bomb? && tile.revealed?
+          return true
+        end
+      end
+    end
+    false
   end
 
 end
