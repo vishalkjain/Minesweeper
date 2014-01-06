@@ -1,5 +1,6 @@
 require 'yaml'
 require 'time'
+require 'debugger'
 class Minesweeper
 
   def initialize
@@ -13,7 +14,7 @@ class Minesweeper
       load_game
     end
 
-    puts "Enter 's' at any time to save."
+    puts "Enter 's' at any time to save. Enter 'b' at any time to see leaderboard."
 
     until @board.over?
       start_time = Time.now
@@ -25,6 +26,9 @@ class Minesweeper
 
       if action == "s"
         save_game
+        next
+      elsif action == "b"
+        show_leaderboard
         next
       end
 
@@ -41,6 +45,8 @@ class Minesweeper
 
     if @board.won?
       puts "YOU WIN!!! It took #{@board.seconds_so_far} seconds"
+      save_to_leaderboard
+      show_leaderboard
     else
       puts "NICE TRY... you lose, and it only took you #{@board.seconds_so_far} seconds."
     end
@@ -57,13 +63,33 @@ class Minesweeper
     saved_board = File.read("minesweeper_save.txt")
     @board = YAML::load(saved_board)
   end
+
+  def save_to_leaderboard
+    leaderboard_array = File.readlines("leaderboard.txt")
+    leaderboard_array.map! { |time| time.to_f }
+    leaderboard_array << @board.seconds_so_far
+    leaderboard_array.sort!
+
+    File.open("leaderboard.txt", "w") do |f|
+      leaderboard_array.each do |time|
+        f.puts time.to_s
+      end
+    end
+  end
+
+  def show_leaderboard
+    leaderboard_array = File.readlines("leaderboard.txt")
+    puts "Leaderboard:"
+    leaderboard_array.each_with_index { |time, index| puts "#{index+1}: #{time}" }
+  end
 end
+
 
 class Board
   attr_accessor :seconds_so_far
 
   BOMB_NUMBER = 10
-  BOARD_SIZE = 9
+  BOARD_SIZE = 10
 
   def initialize
     @board_array = set_board
@@ -88,7 +114,7 @@ class Board
   end
 
   def set_board
-    blank_board = Array.new(BOARD_SIZE){Array.new(BOARD_SIZE){Tile.new}}
+    blank_board = Array.new(BOARD_SIZE) { Array.new(BOARD_SIZE) { Tile.new } }
 
     bomb_board = set_bombs(blank_board)
     finished_board = set_numbers(bomb_board)
@@ -127,7 +153,7 @@ class Board
       positions_visited << current_position
 
       checkers.each do |change|
-
+        #debugger
         adjacent_coordinates = [current_position[0] + change[0], current_position[1] + change[1]]
 
         possible_y = adjacent_coordinates[0]
@@ -140,7 +166,10 @@ class Board
 
         if possible_tile.value == 0
           possible_tile.reveal
+          #p positions_to_visit
+          #p [possible_y, possible_x]
           positions_to_visit << [possible_y, possible_x] unless positions_visited.include?([possible_y, possible_x])
+
         elsif possible_tile.value > 0
           possible_tile.reveal
         end
@@ -153,8 +182,8 @@ class Board
     bombs_placed = 0
 
     until bombs_placed == BOMB_NUMBER
-      rand_x = rand(9)
-      rand_y = rand(9)
+      rand_x = rand(BOARD_SIZE)
+      rand_y = rand(BOARD_SIZE)
       next if board[rand_x][rand_y].bomb?
 
       board[rand_x][rand_y].make_bomb
