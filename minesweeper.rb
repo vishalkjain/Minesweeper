@@ -99,6 +99,8 @@ class Board
 
   BOMB_NUMBER = 1
   BOARD_SIZE = 5
+  CHECKERS = [[1,1], [1,0], [1,-1], [0,-1], [-1,-1], [-1,0], [-1,1], [0,1]]
+
 
   def initialize
     @board_array = set_board
@@ -151,8 +153,6 @@ class Board
   end
 
   def update_zeros(y, x)
-    checkers=[[1,1], [1,0], [1,-1], [0,-1], [-1,-1], [-1,0], [-1,1], [0,1]]
-
     positions_to_visit = [[y,x]]
     positions_visited = []
 
@@ -161,27 +161,20 @@ class Board
       current_position = positions_to_visit.shift
       positions_visited << current_position
 
-      checkers.each do |change|
-        #debugger
-        adjacent_coordinates = [current_position[0] + change[0], current_position[1] + change[1]]
+      CHECKERS.each do |change|
+        possible_y, possible_x = (current_position[0] + change[0]), (current_position[1] + change[1])
 
-        possible_y = adjacent_coordinates[0]
-        possible_x = adjacent_coordinates[1]
-
-        next if @board_array[possible_y].nil? || possible_y < 0
-        next if @board_array[possible_y][possible_x].nil? || possible_x < 0
+        next if @board_array[possible_y].nil? || possible_y < 0 ||
+                @board_array[possible_y][possible_x].nil? || possible_x < 0
 
         possible_tile = @board_array[possible_y][possible_x]
 
         if possible_tile.value == 0
           possible_tile.reveal
-
           positions_to_visit << [possible_y, possible_x] unless positions_visited.include?([possible_y, possible_x])
-
         elsif possible_tile.value > 0
           possible_tile.reveal
         end
-
       end
     end
   end
@@ -206,26 +199,21 @@ class Board
   end
 
   def set_numbers(board)
-    checkers=[[1,1], [1,0], [1,-1], [0,-1], [-1,-1], [-1,0], [-1,1], [0,1]]
-
     board.each_with_index do |row, y|
       row.each_with_index do |tile, x|
         next if tile.bomb?
 
-        checkers.each do |change|
-          adjacent_coordinates = [y + change[0], x + change[1]]
-          possible_y = adjacent_coordinates[0]
-          possible_x = adjacent_coordinates[1]
+        CHECKERS.each do |change|
+          possible_y, possible_x = (y + change[0]), (x + change[1])
 
-          next if board[possible_y].nil? || possible_y < 0
-          next if row[possible_x].nil? || possible_x < 0
+          next if board[possible_y].nil? || possible_y < 0 ||
+                  row[possible_x].nil? || possible_x < 0
 
           adjacent_tile = board[possible_y][possible_x]
 
           if adjacent_tile.bomb?
             tile.value += 1
           end
-
         end
       end
     end
