@@ -16,8 +16,11 @@ class Minesweeper
     puts "Enter 's' at any time to save."
 
     until @board.over?
+      start_time = Time.now
+
       @board.display
       puts "Would you like to flag(f) or reveal(r)? "
+
       action = gets.chomp
 
       if action == "s"
@@ -28,15 +31,18 @@ class Minesweeper
       puts "Where?"
       coordinate = gets.chomp
       @board.take_action(action, coordinate)
+
+      stop_time = Time.now
+      turn_time = stop_time - start_time
+      @board.seconds_so_far += turn_time
     end
 
     @board.display
 
     if @board.won?
-      end_time = Time.now.sec - @board.time
-      puts "YOU WIN!!! It took #{end_time} seconds"
+      puts "YOU WIN!!! It took #{@board.seconds_so_far} seconds"
     else
-      puts "NICE TRY... you lose."
+      puts "NICE TRY... you lose, and it only took you #{@board.seconds_so_far} seconds."
     end
   end
 
@@ -54,14 +60,15 @@ class Minesweeper
 end
 
 class Board
-  attr_reader :time
+  attr_accessor :seconds_so_far
+
   BOMB_NUMBER = 10
   BOARD_SIZE = 9
 
   def initialize
     @board_array = set_board
     @flags = BOMB_NUMBER
-    @time = Time.now
+    @seconds_so_far = 0
   end
 
   def display
