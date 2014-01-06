@@ -9,10 +9,13 @@ class Minesweeper
 
   def run
     start_screen
+    input_loop
+    display_end_condition
+  end
 
+  def input_loop
     until @board.over?
       start_time = Time.now
-
       @board.display
 
       puts "Would you like to flag(f) or reveal(r)? "
@@ -31,10 +34,7 @@ class Minesweeper
 
       @board.seconds_so_far += (Time.now - start_time)
     end
-
-    display_end_condition
   end
-
 
   def start_screen
     puts "New game(n) or load a saved game(l)?"
