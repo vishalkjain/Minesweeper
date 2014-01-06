@@ -1,6 +1,7 @@
 require 'yaml'
 require 'time'
 require 'unicode'
+require 'colorize'
 
 class Minesweeper
 
@@ -114,9 +115,9 @@ class Board
       row.each do |tile|
 
         if tile.flagged?
-          print "#{"\u2714".encode("utf-8")} "
+          print "#{"\u2714".encode("utf-8")} ".colorize(:background => :light_blue)
         elsif tile.hidden?
-          print "_ "
+          print "_ ".colorize(:background => :grey)
         elsif tile.revealed?
           print tile.value.to_s + " "
         end
