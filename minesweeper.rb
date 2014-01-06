@@ -8,20 +8,14 @@ class Minesweeper
   end
 
   def run
-    puts "New game(n) or load a saved game(l)?"
-    new_or_saved = gets.chomp
-    if new_or_saved == "l"
-      load_game
-    end
-
-    puts "Enter 's' at any time to save. Enter 'b' at any time to see leaderboard."
+    start_screen
 
     until @board.over?
       start_time = Time.now
 
       @board.display
-      puts "Would you like to flag(f) or reveal(r)? "
 
+      puts "Would you like to flag(f) or reveal(r)? "
       action = gets.chomp
 
       if action == "s"
@@ -33,13 +27,28 @@ class Minesweeper
       end
 
       puts "Where?"
-      coordinate = gets.chomp
-      @board.take_action(action, coordinate)
+      @board.take_action(action,gets.chomp)
 
-      stop_time = Time.now
-      turn_time = stop_time - start_time
-      @board.seconds_so_far += turn_time
+      @board.seconds_so_far += (Time.now - start_time)
     end
+
+    display_end_condition
+  end
+
+
+  def start_screen
+    puts "New game(n) or load a saved game(l)?"
+    new_or_saved = gets.chomp
+
+    if new_or_saved == "l"
+      load_game
+    end
+
+    puts "Enter 's' at any time to save. Enter 'b' at any time to see leaderboard."
+  end
+
+  def display_end_condition
+    @board.reveal_all_bombs
 
     @board.display
 
@@ -88,8 +97,8 @@ end
 class Board
   attr_accessor :seconds_so_far
 
-  BOMB_NUMBER = 10
-  BOARD_SIZE = 10
+  BOMB_NUMBER = 1
+  BOARD_SIZE = 5
 
   def initialize
     @board_array = set_board
@@ -166,8 +175,7 @@ class Board
 
         if possible_tile.value == 0
           possible_tile.reveal
-          #p positions_to_visit
-          #p [possible_y, possible_x]
+
           positions_to_visit << [possible_y, possible_x] unless positions_visited.include?([possible_y, possible_x])
 
         elsif possible_tile.value > 0
@@ -191,6 +199,10 @@ class Board
     end
 
     board
+  end
+
+  def reveal_all_bombs
+    bombs.each { |bomb| bomb.reveal}
   end
 
   def set_numbers(board)
