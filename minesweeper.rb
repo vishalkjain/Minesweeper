@@ -1,3 +1,5 @@
+require 'yaml'
+
 class Minesweeper
 
   def initialize
@@ -5,10 +7,21 @@ class Minesweeper
   end
 
   def run
+    # puts "New game(n) or load a saved game(l)?"
+#     new_or_saved = gets.chomp
+
+    puts "Enter 's' at any time to save."
+
     until @board.over?
       @board.display
       puts "Would you like to flag(f) or reveal(r)? "
       action = gets.chomp
+
+      if action == "s"
+        save_game
+        next
+      end
+
       puts "Where?"
       coordinate = gets.chomp
       @board.take_action(action, coordinate)
@@ -22,10 +35,18 @@ class Minesweeper
       puts "NICE TRY... you lose."
     end
   end
+
+  def save_game
+    save = self.to_yaml
+    File.open("minesweeper_save.txt", "w") do |f|
+      f.puts save
+    end
+  end
 end
 
 class Board
   BOMB_NUMBER = 10
+  BOARD_SIZE = 9
 
   def initialize
     @board_array = set_board
@@ -44,12 +65,12 @@ class Board
           print tile.value.to_s + " "
         end
       end
-      puts
+      puts "\n"
     end
   end
 
   def set_board
-    blank_board = Array.new(9){Array.new(9){Tile.new}}
+    blank_board = Array.new(BOARD_SIZE){Array.new(BOARD_SIZE){Tile.new}}
 
     bomb_board = set_bombs(blank_board)
     finished_board = set_numbers(bomb_board)
